@@ -1,0 +1,1340 @@
+name: Setup Project Backlog
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  setup-labels:
+    name: Create Labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          create_label() {
+            local name="$1" color="$2" description="$3"
+            gh api repos/$REPO/labels \
+              --method POST \
+              -f name="$name" \
+              -f color="$color" \
+              -f description="$description" 2>/dev/null \
+            || gh api repos/$REPO/labels/"$(echo "$name" | sed 's/ /%20/g')" \
+              --method PATCH \
+              -f color="$color" \
+              -f description="$description" 2>/dev/null \
+            || true
+          }
+
+          create_label "setup"        "0075ca" "Project setup and configuration"
+          create_label "architecture" "e4e669" "Architecture and code structure"
+          create_label "firebase"     "f9d0c4" "Firebase backend tasks"
+          create_label "auth"         "d93f0b" "Authentication related tasks"
+          create_label "ui"           "bfd4f2" "User interface tasks"
+          create_label "backend"      "0052cc" "Backend and data layer tasks"
+          create_label "ai"           "5319e7" "AI / Gemini integration tasks"
+          create_label "social"       "e99695" "Social features"
+          create_label "feature"      "84b6eb" "New feature"
+          create_label "bug"          "ee0701" "Bug fix"
+          create_label "testing"      "c5def5" "Testing tasks"
+          create_label "polish"       "fef2c0" "Polishing and UX improvements"
+
+  create-issues:
+    name: Create Backlog Issues
+    runs-on: ubuntu-latest
+    needs: setup-labels
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+    steps:
+
+      # ── 1. Setup projekta ──────────────────────────────────────────────────
+      - name: "Setup - Setup Android project (Compose)"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup Android project (Compose)" \
+            --label "setup,feature" \
+            --body "## Opis
+          Inicijalizirati novi Android projekt s Jetpack Compose podrškom.
+
+          ## Zadaci
+          - [ ] Kreiraj novi Android projekt u Android Studiju
+          - [ ] Odaberi Jetpack Compose template
+          - [ ] Postavi minimalni SDK (API 26+)
+          - [ ] Provjeri da se projekt kompajlira i pokreće na emulatoru" || true
+
+      - name: "Setup - Setup Git repository"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup Git repository" \
+            --label "setup,feature" \
+            --body "## Opis
+          Inicijalizirati Git repozitorij i podesiti osnovnu strukturu.
+
+          ## Zadaci
+          - [ ] Inicijalizirati Git repozitorij
+          - [ ] Dodati `.gitignore` za Android projekte
+          - [ ] Kreirati inicijalni commit
+          - [ ] Objaviti na GitHub" || true
+
+      - name: "Setup - Setup GitHub project board"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup GitHub project board" \
+            --label "setup,feature" \
+            --body "## Opis
+          Kreirati GitHub Project board s kolonama za praćenje toka rada.
+
+          ## Zadaci
+          - [ ] Kreiraj novi GitHub Project (Projects v2)
+          - [ ] Dodaj kolone: Backlog → Ready → In progress → In review → Done
+          - [ ] Poveži projekt s repozitorijem
+          - [ ] Dodaj sve taskove u Backlog" || true
+
+      - name: "Setup - Setup project package structure"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup project package structure" \
+            --label "setup,architecture" \
+            --body "## Opis
+          Kreirati osnovnu strukturu paketa prema MVVM arhitekturi.
+
+          ## Struktura
+          \`\`\`
+          com.cookbook
+          ├── data
+          │   ├── local
+          │   ├── remote
+          │   └── repository
+          ├── domain
+          │   ├── model
+          │   └── usecase
+          ├── ui
+          │   ├── screens
+          │   ├── components
+          │   └── navigation
+          └── util
+          \`\`\`
+
+          ## Zadaci
+          - [ ] Kreiraj sve direktorije i placeholder klase
+          - [ ] Provjeri da se projekt kompajlira" || true
+
+      - name: "Setup - Configure Gradle dependencies"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Configure Gradle dependencies" \
+            --label "setup,feature" \
+            --body "## Opis
+          Dodati sve potrebne ovisnosti u \`build.gradle.kts\`.
+
+          ## Ovisnosti
+          - [ ] Jetpack Compose BOM
+          - [ ] Navigation Compose
+          - [ ] Firebase BOM (Auth, Firestore, Storage)
+          - [ ] Hilt (dependency injection)
+          - [ ] Coil (učitavanje slika)
+          - [ ] Kotlin Coroutines
+          - [ ] Lifecycle ViewModel Compose
+          - [ ] Retrofit / OkHttp (ako treba za Gemini)
+          - [ ] Gemini Android SDK" || true
+
+      - name: "Setup - Setup navigation structure"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup navigation structure" \
+            --label "setup,ui" \
+            --body "## Opis
+          Implementirati Navigation Compose s definiranim rutama za sve ekrane.
+
+          ## Zadaci
+          - [ ] Dodaj Navigation Compose ovisnost
+          - [ ] Definiraj \`Screen\` sealed class / enum s rutama
+          - [ ] Kreiraj \`AppNavHost\` composable
+          - [ ] Postavi početni ekran (Login ili Home)
+          - [ ] Provjeri navigaciju između ekrana" || true
+
+      # ── 2. Arhitektura projekta ────────────────────────────────────────────
+      - name: "Architecture - Create base MVVM architecture"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create base MVVM architecture" \
+            --label "architecture,feature" \
+            --body "## Opis
+          Postaviti temelje MVVM arhitekture koja će se koristiti kroz cijeli projekt.
+
+          ## Zadaci
+          - [ ] Definiraj \`BaseViewModel\` s uobičajenim state managementom
+          - [ ] Postavi \`UiState\` sealed class
+          - [ ] Konfiguriraj Hilt za dependency injection
+          - [ ] Dokumentiraj arhitekturne smjernice u README" || true
+
+      - name: "Architecture - Create project package structure (data/domain/ui)"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create project package structure (data/domain/ui)" \
+            --label "architecture,setup" \
+            --body "## Opis
+          Kreirati i popuniti osnovnu strukturu paketa s placeholder klasama.
+
+          ## Paketi
+          - [ ] \`data/local\` — Room entiteti i DAO
+          - [ ] \`data/remote\` — Firebase i Gemini API klijenti
+          - [ ] \`data/repository\` — implementacije repozitorija
+          - [ ] \`domain/model\` — domenski modeli
+          - [ ] \`domain/usecase\` — use case klase
+          - [ ] \`ui/screens\` — ekrani aplikacije
+          - [ ] \`ui/components\` — višekratni Compose komponente
+          - [ ] \`ui/navigation\` — navigacijska logika" || true
+
+      - name: "Architecture - Setup ViewModel base structure"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup ViewModel base structure" \
+            --label "architecture,feature" \
+            --body "## Opis
+          Kreirati bazni ViewModel s podrškom za Hilt i lifecycle-aware state management.
+
+          ## Zadaci
+          - [ ] Kreiraj \`BaseViewModel : ViewModel()\`
+          - [ ] Dodaj \`StateFlow\` za UI state
+          - [ ] Dodaj \`SharedFlow\` za jednokratne događaje (navigation, snackbar)
+          - [ ] Testiraj s jednostavnim primjerom" || true
+
+      - name: "Architecture - Setup Repository pattern"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup Repository pattern" \
+            --label "architecture,backend" \
+            --body "## Opis
+          Implementirati Repository pattern koji apstrahira izvore podataka.
+
+          ## Zadaci
+          - [ ] Definiraj sučelja (interfaces) za svaki repozitorij
+          - [ ] Kreiraj implementacije koje koriste Firebase / lokalna baza
+          - [ ] Registriraj repozitorije s Hilt modulima
+          - [ ] Provjeri ispravno ubrizgavanje ovisnosti" || true
+
+      - name: "Architecture - Create Result / Resource wrapper for network calls"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Result / Resource wrapper for network calls" \
+            --label "architecture,backend" \
+            --body "## Opis
+          Kreirati generički wrapper koji omotava rezultate mrežnih/Firebase poziva.
+
+          ## Implementacija
+          \`\`\`kotlin
+          sealed class Resource<T> {
+              data class Success<T>(val data: T) : Resource<T>()
+              data class Error<T>(val message: String) : Resource<T>()
+              class Loading<T> : Resource<T>()
+          }
+          \`\`\`
+
+          ## Zadaci
+          - [ ] Implementiraj \`Resource<T>\` sealed class
+          - [ ] Koristi ga u svim repozitorijima
+          - [ ] Provjeri rukovanje greškama u ViewModelu" || true
+
+      # ── 3. Firebase setup ──────────────────────────────────────────────────
+      - name: "Firebase - Create Firebase project"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Firebase project" \
+            --label "firebase,setup" \
+            --body "## Opis
+          Kreirati Firebase projekt za CookBook aplikaciju.
+
+          ## Zadaci
+          - [ ] Prijavi se na Firebase Console (console.firebase.google.com)
+          - [ ] Kreiraj novi projekt: \`cookbook-ai\`
+          - [ ] Aktiviraj Google Analytics (opcionalno)
+          - [ ] Zapamti Project ID za konfiguraciju" || true
+
+      - name: "Firebase - Connect Android app to Firebase"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Connect Android app to Firebase" \
+            --label "firebase,setup" \
+            --body "## Opis
+          Povezati Android aplikaciju s Firebase projektom.
+
+          ## Zadaci
+          - [ ] Registriraj Android app u Firebase Consoleu
+          - [ ] Preuzmi \`google-services.json\` i stavi u \`app/\`
+          - [ ] Dodaj Firebase BOM i plugin u Gradle
+          - [ ] Provjeri da se aplikacija uspješno pokreće s Firebase" || true
+
+      - name: "Firebase - Setup Firebase Authentication"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup Firebase Authentication" \
+            --label "firebase,auth" \
+            --body "## Opis
+          Konfigurirati Firebase Authentication za email/lozinka prijavu.
+
+          ## Zadaci
+          - [ ] Aktiviraj Email/Password provider u Firebase Consoleu
+          - [ ] Dodaj \`firebase-auth\` ovisnost
+          - [ ] Inicijaliziraj \`FirebaseAuth\` instance
+          - [ ] Testiraj s test korisnikom" || true
+
+      - name: "Firebase - Setup Firestore database"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup Firestore database" \
+            --label "firebase,backend" \
+            --body "## Opis
+          Konfigurirati Cloud Firestore bazu podataka.
+
+          ## Zadaci
+          - [ ] Aktiviraj Firestore u Firebase Consoleu (Native mode)
+          - [ ] Postavi sigurnosna pravila (development mode)
+          - [ ] Dodaj \`firebase-firestore\` ovisnost
+          - [ ] Testiraj čitanje/pisanje s jednostavnim dokumentom" || true
+
+      - name: "Firebase - Setup Firebase Storage (images)"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup Firebase Storage (images)" \
+            --label "firebase,backend" \
+            --body "## Opis
+          Konfigurirati Firebase Storage za pohranu slika recepata.
+
+          ## Zadaci
+          - [ ] Aktiviraj Firebase Storage u Firebase Consoleu
+          - [ ] Postavi sigurnosna pravila za Storage
+          - [ ] Dodaj \`firebase-storage\` ovisnost
+          - [ ] Testiraj upload i download slike" || true
+
+      - name: "Firebase - Define Firestore database schema"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Define Firestore database schema" \
+            --label "firebase,backend,architecture" \
+            --body "## Opis
+          Definirati strukturu Firestore kolekcija i dokumenata.
+
+          ## Schema
+          ### Kolekcija \`users\`
+          \`\`\`
+          users/{userId}
+            - uid: String
+            - displayName: String
+            - email: String
+            - photoUrl: String
+            - bio: String
+            - followers: List<String>
+            - following: List<String>
+            - createdAt: Timestamp
+          \`\`\`
+
+          ### Kolekcija \`recipes\`
+          \`\`\`
+          recipes/{recipeId}
+            - id: String
+            - title: String
+            - description: String
+            - imageUrl: String
+            - authorId: String
+            - authorName: String
+            - ingredients: List<Ingredient>
+            - steps: List<Step>
+            - tags: List<String>
+            - averageRating: Double
+            - ratingCount: Int
+            - likeCount: Int
+            - likedBy: List<String>
+            - createdAt: Timestamp
+          \`\`\`
+
+          ### Kolekcija \`ratings\`
+          \`\`\`
+          ratings/{recipeId}/userRatings/{userId}
+            - userId: String
+            - rating: Int (1-5)
+            - createdAt: Timestamp
+          \`\`\`
+
+          ## Zadaci
+          - [ ] Dokumentiraj schema u kodu (data classes)
+          - [ ] Kreiraj Firestore sigurnosna pravila
+          - [ ] Provjeri indekse za query optimizaciju" || true
+
+      # ── 4. Authentication ──────────────────────────────────────────────────
+      - name: "Auth - Implement user registration"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement user registration" \
+            --label "auth,feature,firebase" \
+            --body "## Opis
+          Implementirati ekran i logiku za registraciju novih korisnika.
+
+          ## Zadaci
+          - [ ] Kreiraj \`RegisterScreen\` (email, lozinka, potvrda lozinke)
+          - [ ] Implementiraj validaciju forme
+          - [ ] Pozovi \`FirebaseAuth.createUserWithEmailAndPassword()\`
+          - [ ] Kreiraj korisnički dokument u Firestoreu
+          - [ ] Preusmjeri na Home ekran nakon uspješne registracije" || true
+
+      - name: "Auth - Implement user login"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement user login" \
+            --label "auth,feature,firebase" \
+            --body "## Opis
+          Implementirati ekran i logiku za prijavu korisnika.
+
+          ## Zadaci
+          - [ ] Kreiraj \`LoginScreen\` (email, lozinka)
+          - [ ] Implementiraj validaciju
+          - [ ] Pozovi \`FirebaseAuth.signInWithEmailAndPassword()\`
+          - [ ] Rukuj greškama (pogrešna lozinka, korisnik ne postoji)
+          - [ ] Preusmjeri na Home ekran" || true
+
+      - name: "Auth - Implement logout"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement logout" \
+            --label "auth,feature" \
+            --body "## Opis
+          Implementirati funkcionalnost odjave korisnika.
+
+          ## Zadaci
+          - [ ] Dodaj opciju odjave u Profile ekranu
+          - [ ] Pozovi \`FirebaseAuth.signOut()\`
+          - [ ] Ukloni lokalnu sesiju
+          - [ ] Preusmjeri na Login ekran" || true
+
+      - name: "Auth - Create user profile document in Firestore"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create user profile document in Firestore" \
+            --label "auth,firebase,backend" \
+            --body "## Opis
+          Nakon registracije automatski kreirati korisnički dokument u Firestoreu.
+
+          ## Zadaci
+          - [ ] U \`AuthRepository\` nakon registracije kreiraj \`User\` dokument
+          - [ ] Pohrani: uid, email, displayName, createdAt
+          - [ ] Rukuj greškama pri kreiranju dokumenta" || true
+
+      - name: "Auth - Persist logged in user session"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Persist logged in user session" \
+            --label "auth,feature" \
+            --body "## Opis
+          Pohraniti korisničku sesiju kako aplikacija ne bi tražila ponovnu prijavu.
+
+          ## Zadaci
+          - [ ] Firebase Auth automatski čuva sesiju — provjeri da radi
+          - [ ] Na startu aplikacije provjeri \`FirebaseAuth.currentUser\`
+          - [ ] Preusmjeri na odgovarajući ekran (Home ili Login)
+          - [ ] Testiraj scenarij: zatvori aplikaciju i ponovo otvori" || true
+
+      # ── 5. Recipe data model ───────────────────────────────────────────────
+      - name: "Data - Create Recipe data model"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Recipe data model" \
+            --label "backend,feature" \
+            --body "## Opis
+          Kreirati domenski model za recept.
+
+          ## Implementacija
+          \`\`\`kotlin
+          data class Recipe(
+              val id: String = \"\",
+              val title: String = \"\",
+              val description: String = \"\",
+              val imageUrl: String = \"\",
+              val authorId: String = \"\",
+              val authorName: String = \"\",
+              val ingredients: List<Ingredient> = emptyList(),
+              val steps: List<Step> = emptyList(),
+              val tags: List<String> = emptyList(),
+              val averageRating: Double = 0.0,
+              val ratingCount: Int = 0,
+              val likeCount: Int = 0,
+              val likedBy: List<String> = emptyList(),
+              val createdAt: Long = 0L
+          )
+          \`\`\`
+
+          ## Zadaci
+          - [ ] Kreiraj \`Recipe\` data class u \`domain/model\`
+          - [ ] Dodaj mapper između Firestore dokumenta i domenskog modela" || true
+
+      - name: "Data - Create Ingredient data model"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Ingredient data model" \
+            --label "backend,feature" \
+            --body "## Opis
+          Kreirati domenski model za sastojak recepta.
+
+          ## Implementacija
+          \`\`\`kotlin
+          data class Ingredient(
+              val name: String = \"\",
+              val amount: String = \"\",
+              val unit: String = \"\"
+          )
+          \`\`\`
+
+          ## Zadaci
+          - [ ] Kreiraj \`Ingredient\` data class u \`domain/model\`" || true
+
+      - name: "Data - Create Step data model"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Step data model" \
+            --label "backend,feature" \
+            --body "## Opis
+          Kreirati domenski model za korak u receptu.
+
+          ## Implementacija
+          \`\`\`kotlin
+          data class Step(
+              val order: Int = 0,
+              val description: String = \"\"
+          )
+          \`\`\`
+
+          ## Zadaci
+          - [ ] Kreiraj \`Step\` data class u \`domain/model\`" || true
+
+      - name: "Data - Create Recipe repository"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Recipe repository" \
+            --label "backend,firebase,feature" \
+            --body "## Opis
+          Implementirati repozitorij koji upravlja operacijama s receptima.
+
+          ## Sučelje
+          \`\`\`kotlin
+          interface RecipeRepository {
+              suspend fun getRecipes(): Resource<List<Recipe>>
+              suspend fun getRecipeById(id: String): Resource<Recipe>
+              suspend fun createRecipe(recipe: Recipe): Resource<String>
+              suspend fun updateRecipe(recipe: Recipe): Resource<Unit>
+              suspend fun deleteRecipe(id: String): Resource<Unit>
+              fun getRecipesFlow(): Flow<Resource<List<Recipe>>>
+          }
+          \`\`\`
+
+          ## Zadaci
+          - [ ] Definiraj \`RecipeRepository\` interface
+          - [ ] Implementiraj \`FirestoreRecipeRepository\`
+          - [ ] Registriraj s Hilt
+          - [ ] Provjeri CRUD operacije" || true
+
+      - name: "Data - Implement recipe CRUD operations"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement recipe CRUD operations" \
+            --label "backend,firebase,feature" \
+            --body "## Opis
+          Implementirati Create, Read, Update, Delete operacije za recepte u Firestoreu.
+
+          ## Zadaci
+          - [ ] **Create**: dodaj recept u kolekciju \`recipes\`
+          - [ ] **Read**: dohvati sve recepte / recept po ID-u
+          - [ ] **Update**: ažuriraj recept (samo autor može)
+          - [ ] **Delete**: ukloni recept (samo autor može)
+          - [ ] Postavi Firestore sigurnosna pravila za CRUD" || true
+
+      # ── 6. Recipe UI ───────────────────────────────────────────────────────
+      - name: "UI - Create RecipeCard component"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create RecipeCard component" \
+            --label "ui,feature" \
+            --body "## Opis
+          Kreirati višekratnu Jetpack Compose komponentu za prikaz recepta u listi.
+
+          ## Sadržaj komponente
+          - Slika recepta
+          - Naslov recepta
+          - Ime autora
+          - Prosječna ocjena (⭐)
+          - Broj lajkova (❤️)
+
+          ## Zadaci
+          - [ ] Kreiraj \`RecipeCard\` composable u \`ui/components\`
+          - [ ] Koristi Coil za učitavanje slike
+          - [ ] Dodaj placeholder sliku
+          - [ ] Provjeri izgled na različitim veličinama ekrana" || true
+
+      - name: "UI - Create Home screen (recipe feed)"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Home screen (recipe feed)" \
+            --label "ui,feature" \
+            --body "## Opis
+          Kreirati početni ekran koji prikazuje feed recepata.
+
+          ## Sadržaj
+          - Lista recepata (\`LazyColumn\` s \`RecipeCard\`)
+          - Search bar na vrhu
+          - Bottom navigation
+          - FAB za dodavanje recepta
+
+          ## Zadaci
+          - [ ] Kreiraj \`HomeScreen\` composable
+          - [ ] Poveži s \`HomeViewModel\`
+          - [ ] Dohvati recepte iz Firestorea
+          - [ ] Prikaži loading / error / empty state" || true
+
+      - name: "UI - Create Recipe Details screen"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Recipe Details screen" \
+            --label "ui,feature" \
+            --body "## Opis
+          Kreirati ekran s detaljima odabranog recepta.
+
+          ## Sadržaj
+          - Velika slika recepta
+          - Naslov i opis
+          - Autor s linkom na profil
+          - Lista sastojaka
+          - Lista koraka pripreme
+          - Ocjena i lajk gumbi
+          - Gumb za uređivanje (ako je autor)
+
+          ## Zadaci
+          - [ ] Kreiraj \`RecipeDetailScreen\`
+          - [ ] Prihvati \`recipeId\` kao navigation argument
+          - [ ] Dohvati recept po ID-u
+          - [ ] Prikaži sve sekcije" || true
+
+      - name: "UI - Create Add Recipe screen"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Add Recipe screen" \
+            --label "ui,feature" \
+            --body "## Opis
+          Kreirati ekran za dodavanje novog recepta.
+
+          ## Polja
+          - Naziv recepta
+          - Opis
+          - Slika (picker)
+          - Sastojci (dinamičko dodavanje)
+          - Koraci pripreme (dinamičko dodavanje)
+          - Tagovi
+
+          ## Zadaci
+          - [ ] Kreiraj \`AddRecipeScreen\`
+          - [ ] Implementiraj dinamičko dodavanje sastojaka i koraka
+          - [ ] Poveži s \`RecipeViewModel\`
+          - [ ] Spremi recept u Firestore
+          - [ ] Navigiraj na detalje ili Home po završetku" || true
+
+      - name: "UI - Create Edit Recipe screen"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create Edit Recipe screen" \
+            --label "ui,feature" \
+            --body "## Opis
+          Kreirati ekran za uređivanje postojećeg recepta.
+
+          ## Zadaci
+          - [ ] Kreiraj \`EditRecipeScreen\` (može rekoristiti \`AddRecipeScreen\`)
+          - [ ] Predpopuni formu s postojećim podacima
+          - [ ] Spremi izmjene u Firestore
+          - [ ] Dostupno samo autoru recepta" || true
+
+      - name: "UI - Implement image picker for recipes"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement image picker for recipes" \
+            --label "ui,feature" \
+            --body "## Opis
+          Implementirati odabir slike s galerije uređaja za recept.
+
+          ## Zadaci
+          - [ ] Dodaj \`ActivityResultContracts.GetContent\` launcher
+          - [ ] Traži dozvolu za čitanje galerije
+          - [ ] Prikaži odabranu sliku u formi
+          - [ ] Proslijedi URI uploaderu" || true
+
+      - name: "UI - Upload recipe image to Firebase Storage"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Upload recipe image to Firebase Storage" \
+            --label "ui,firebase,feature" \
+            --body "## Opis
+          Implementirati upload slike recepta u Firebase Storage.
+
+          ## Zadaci
+          - [ ] Kreiraj \`StorageRepository\` s metodom \`uploadImage(uri, path)\`
+          - [ ] Pohrani sliku u \`recipes/{recipeId}/image.jpg\`
+          - [ ] Vrati download URL i spremi ga u Firestore dokument
+          - [ ] Prikaži progress bar tijekom uploada" || true
+
+      # ── 7. Recipe search & filtering ───────────────────────────────────────
+      - name: "Search - Implement recipe search by title"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement recipe search by title" \
+            --label "ui,feature" \
+            --body "## Opis
+          Implementirati pretragu recepata po naslovu.
+
+          ## Zadaci
+          - [ ] Dodaj search bar na Home ekran
+          - [ ] Filtriranje lokalno ili Firestore query
+          - [ ] Debounce unosa (300ms)
+          - [ ] Prikaži rezultate u realnom vremenu" || true
+
+      - name: "Search - Implement filtering by tags"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement filtering by tags" \
+            --label "ui,feature" \
+            --body "## Opis
+          Implementirati filtriranje recepata po tagovima.
+
+          ## Zadaci
+          - [ ] Prikaži chip-ove s dostupnim tagovima
+          - [ ] Odaberi jedan ili više tagova za filtriranje
+          - [ ] Firestore query: \`whereArrayContains(\"tags\", tag)\`
+          - [ ] Kombiniranje s ostalim filterima" || true
+
+      - name: "Search - Implement filtering by ingredients"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement filtering by ingredients" \
+            --label "ui,feature" \
+            --body "## Opis
+          Implementirati pretragu recepata prema dostupnim sastojcima.
+
+          ## Zadaci
+          - [ ] Polje za unos sastojaka
+          - [ ] Firestore query ili lokalno filtriranje
+          - [ ] Prikaži recepte koji sadrže sve unesene sastojke" || true
+
+      - name: "Search - Implement sorting by rating"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement sorting by rating" \
+            --label "ui,feature" \
+            --body "## Opis
+          Implementirati sortiranje recepata prema prosječnoj ocjeni.
+
+          ## Zadaci
+          - [ ] Dodaj opciju sortiranja (najnoviji / najbolje ocijenjeni)
+          - [ ] Firestore query: \`orderBy(\"averageRating\", descending = true)\`
+          - [ ] Prikaži u UI-u" || true
+
+      # ── 8. Social features ─────────────────────────────────────────────────
+      - name: "Social - Implement like recipe feature"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement like recipe feature" \
+            --label "social,feature,firebase" \
+            --body "## Opis
+          Implementirati mogućnost lajkanja recepata.
+
+          ## Zadaci
+          - [ ] Dodaj gumb ❤️ na \`RecipeCard\` i \`RecipeDetailScreen\`
+          - [ ] Toggle like: dodaj/ukloni korisnikov ID iz \`likedBy\` niza
+          - [ ] Atomski ažuriraj \`likeCount\`
+          - [ ] Prikaži je li korisnik lajkao recept" || true
+
+      - name: "Social - Implement recipe rating system"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement recipe rating system" \
+            --label "social,feature,firebase" \
+            --body "## Opis
+          Implementirati sustav ocjenjivanja recepata s 1-5 zvjezdica.
+
+          ## Zadaci
+          - [ ] Kreiraj \`RatingBar\` composable (zvjezdice)
+          - [ ] Pohrani ocjenu u \`ratings/{recipeId}/userRatings/{userId}\`
+          - [ ] Svaki korisnik može ocjeniti recept jednom
+          - [ ] Triggeruj recalculation prosječne ocjene" || true
+
+      - name: "Social - Calculate average recipe rating"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Calculate average recipe rating" \
+            --label "social,backend,firebase" \
+            --body "## Opis
+          Implementirati izračun i ažuriranje prosječne ocjene recepta.
+
+          ## Zadaci
+          - [ ] Dohvati sve ocjene iz \`ratings/{recipeId}/userRatings\`
+          - [ ] Izračunaj prosjek
+          - [ ] Ažuriraj \`averageRating\` i \`ratingCount\` u receptu
+          - [ ] Razmotri Cloud Function ili client-side izračun" || true
+
+      - name: "Social - Implement follow user feature"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement follow user feature" \
+            --label "social,feature,firebase" \
+            --body "## Opis
+          Implementirati funkcionalnost praćenja korisnika.
+
+          ## Zadaci
+          - [ ] Gumb Follow na korisničkom profilu
+          - [ ] Dodaj \`followedUserId\` u \`following\` listu trenutnog korisnika
+          - [ ] Dodaj \`currentUserId\` u \`followers\` listu praćenog korisnika
+          - [ ] Provjeri da korisnik ne može pratiti sam sebe" || true
+
+      - name: "Social - Implement unfollow user feature"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement unfollow user feature" \
+            --label "social,feature,firebase" \
+            --body "## Opis
+          Implementirati odjavu praćenja korisnika.
+
+          ## Zadaci
+          - [ ] Gumb Unfollow (toggle s Follow)
+          - [ ] Ukloni ID-ove iz \`following\` i \`followers\` lista
+          - [ ] Ažuriraj UI u realnom vremenu" || true
+
+      - name: "Social - Create user profile screen"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create user profile screen" \
+            --label "social,ui,feature" \
+            --body "## Opis
+          Kreirati ekran profila korisnika.
+
+          ## Sadržaj
+          - Avatar korisnika
+          - Ime i bio
+          - Broj pratitelja / praćenih
+          - Gumb Follow/Unfollow
+          - Mreža objavljenih recepata
+
+          ## Zadaci
+          - [ ] Kreiraj \`ProfileScreen\`
+          - [ ] Prikaži vlastiti ili tuđi profil ovisno o \`userId\`
+          - [ ] Navigiraj na profil klikom na ime autora" || true
+
+      - name: "Social - Display follower / following counts"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Display follower / following counts" \
+            --label "social,ui" \
+            --body "## Opis
+          Prikazati broj pratitelja i praćenih korisnika na profilu.
+
+          ## Zadaci
+          - [ ] Dohvati \`followers.size\` i \`following.size\` iz Firestorea
+          - [ ] Prikaži u profilu s klikabilnom listom
+          - [ ] Ažuriraj u realnom vremenu" || true
+
+      - name: "Social - Display user's published recipes"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Display user's published recipes" \
+            --label "social,ui" \
+            --body "## Opis
+          Prikazati sve recepte koje je korisnik objavio na profilu.
+
+          ## Zadaci
+          - [ ] Firestore query: \`recipes\` where \`authorId == userId\`
+          - [ ] Prikaži u mrežnom (grid) prikazu
+          - [ ] Navigiraj na detalje recepta klikom" || true
+
+      # ── 9. AI features (Gemini) ────────────────────────────────────────────
+      - name: "AI - Setup Gemini API integration"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Setup Gemini API integration" \
+            --label "ai,setup,feature" \
+            --body "## Opis
+          Integrirati Google Gemini AI API u Android aplikaciju.
+
+          ## Zadaci
+          - [ ] Dodaj Gemini Android SDK ovisnost (\`google-ai-client-sdk\`)
+          - [ ] Generiraj API ključ u Google AI Studio
+          - [ ] Pohrani API ključ sigurno (\`local.properties\`, BuildConfig)
+          - [ ] Inicijaliziraj \`GenerativeModel(\"gemini-pro\")\`" || true
+
+      - name: "AI - Create AI service class"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Create AI service class" \
+            --label "ai,backend,feature" \
+            --body "## Opis
+          Kreirati servisnu klasu za komunikaciju s Gemini API-jem.
+
+          ## Zadaci
+          - [ ] Kreiraj \`GeminiService\` klasu u \`data/remote\`
+          - [ ] Injectiraj putem Hilt
+          - [ ] Metode: \`generateRecipeFromText(text)\`, \`suggestRecipes(ingredients)\`
+          - [ ] Rukovanje greškama i timeoutima" || true
+
+      - name: "AI - Implement AI recipe import from text"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement AI recipe import from text" \
+            --label "ai,feature" \
+            --body "## Opis
+          Implementirati mogućnost uvoza recepta iz slobodnog teksta pomoću Gemini AI.
+
+          ## Tok rada
+          1. Korisnik unese ili zalijepi tekst recepta
+          2. Aplikacija šalje tekst Geminiju s promptom za strukturiranje
+          3. Gemini vraća JSON s receptom
+          4. Aplikacija parsira i prikaže formu za potvrdu
+
+          ## Zadaci
+          - [ ] Kreiraj \`AiImportScreen\` s text poljem
+          - [ ] Napiši prompt za Gemini koji vraća strukturirani JSON
+          - [ ] Prikaz parsiranog recepta na pregledu
+          - [ ] Gumb za spremi u Firestore" || true
+
+      - name: "AI - Parse AI structured recipe response"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Parse AI structured recipe response" \
+            --label "ai,backend" \
+            --body "## Opis
+          Implementirati parsiranje JSON odgovora Gemini AI-ja u domenski model recepta.
+
+          ## Zadaci
+          - [ ] Definiraj JSON schema koji Gemini treba vratiti
+          - [ ] Koristi \`kotlinx.serialization\` za parsiranje
+          - [ ] Rukuj nepotpunim ili neispravnim AI odgovorima
+          - [ ] Mapiraj u \`Recipe\` domenski model" || true
+
+      - name: "AI - Save AI generated recipe"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Save AI generated recipe" \
+            --label "ai,backend,firebase" \
+            --body "## Opis
+          Implementirati spremanje AI generiranog recepta u Firestore.
+
+          ## Zadaci
+          - [ ] Korisnik potvrdi ili uredi AI recept
+          - [ ] Spremi u Firestore kao standardni recept
+          - [ ] Označi recept kao AI generiran (\`isAiGenerated: true\`)" || true
+
+      - name: "AI - Implement ingredient based recipe suggestions"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement ingredient based recipe suggestions" \
+            --label "ai,feature" \
+            --body "## Opis
+          Implementirati AI prijedloge recepata na temelju dostupnih sastojaka.
+
+          ## Tok rada
+          1. Korisnik unese sastojke koje ima kod kuće
+          2. Aplikacija šalje listu Geminiju
+          3. Gemini predlaže recepte s tim sastojcima
+          4. Prikaz prijedloga s mogućnošću uvoza
+
+          ## Zadaci
+          - [ ] Kreiraj \`AiSuggestScreen\`
+          - [ ] Dinamičko dodavanje sastojaka (chips)
+          - [ ] Pošalji upit Geminiju
+          - [ ] Prikaži predložene recepte" || true
+
+      - name: "AI - Display AI suggested recipes"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Display AI suggested recipes" \
+            --label "ai,ui" \
+            --body "## Opis
+          Prikazati AI predložene recepte u lijepo oblikovanom UI-ju.
+
+          ## Zadaci
+          - [ ] Prikaži listu predloženih recepata
+          - [ ] Svaki prijedlog ima naslov, kratki opis, listu sastojaka
+          - [ ] Gumb za uvoz svakog recepta u aplikaciju" || true
+
+      # ── 10. AI vision (bonus) ──────────────────────────────────────────────
+      - name: "AI Vision - Capture ingredients image"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Capture ingredients image" \
+            --label "ai,feature" \
+            --body "## Opis
+          Implementirati snimanje slike sastojaka kamerom ili odabir iz galerije.
+
+          ## Zadaci
+          - [ ] Dodaj CameraX ili koristiti intent za kameru
+          - [ ] Dozvole: \`CAMERA\`, \`READ_EXTERNAL_STORAGE\`
+          - [ ] Prikaz slike u pregledu" || true
+
+      - name: "AI Vision - Send image to Gemini vision"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Send image to Gemini vision" \
+            --label "ai,backend" \
+            --body "## Opis
+          Poslati sliku sastojaka Gemini Vision API-ju za analizu.
+
+          ## Zadaci
+          - [ ] Koristi \`gemini-pro-vision\` model
+          - [ ] Pošalji sliku kao \`InlineData\` ili Base64
+          - [ ] Prompt: \"Navedi sve sastojke koje vidiš na slici u JSON formatu\"" || true
+
+      - name: "AI Vision - Extract ingredients from image"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Extract ingredients from image" \
+            --label "ai,backend" \
+            --body "## Opis
+          Parsirati odgovor Gemini Vision API-ja i izvući listu sastojaka.
+
+          ## Zadaci
+          - [ ] Parsiraj JSON odgovor
+          - [ ] Prikaži prepoznate sastojke korisniku
+          - [ ] Dozvoli uređivanje liste" || true
+
+      - name: "AI Vision - Generate recipe suggestions from detected ingredients"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Generate recipe suggestions from detected ingredients" \
+            --label "ai,feature" \
+            --body "## Opis
+          Generirati prijedloge recepata na temelju sastojaka prepoznatih sa slike.
+
+          ## Zadaci
+          - [ ] Proslijedi prepoznate sastojke u \`GeminiService.suggestRecipes()\`
+          - [ ] Prikaži prijedloge recepata
+          - [ ] Cijeli tok: slika → sastojci → recepti" || true
+
+      # ── 11. Notifications (bonus) ──────────────────────────────────────────
+      - name: "Notifications - Implement follow notifications"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Implement follow notifications" \
+            --label "feature,firebase" \
+            --body "## Opis
+          Slati push notifikaciju kad netko počne pratiti korisnika.
+
+          ## Zadaci
+          - [ ] Setup Firebase Cloud Messaging (FCM)
+          - [ ] Pohrani FCM token u Firestore korisničkom dokumentu
+          - [ ] Cloud Function ili Cloud Tasks za slanje notifikacije
+          - [ ] Prikaži notifikaciju na uređaju" || true
+
+      - name: "Notifications - Send notification when followed user posts recipe"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Send notification when followed user posts recipe" \
+            --label "feature,firebase,social" \
+            --body "## Opis
+          Obavijestiti pratitelje kad korisnik kojeg prate objavi novi recept.
+
+          ## Zadaci
+          - [ ] Dohvati liste pratitelja autora
+          - [ ] Pošalji FCM notifikaciju svakom pratitelju
+          - [ ] Notifikacija sadrži: ime autora, naslov recepta, link" || true
+
+      # ── 12. Polishing ──────────────────────────────────────────────────────
+      - name: "Polish - Add loading states"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Add loading states" \
+            --label "ui,polish" \
+            --body "## Opis
+          Dodati loading indikatore na sve ekrane koji dohvaćaju podatke.
+
+          ## Zadaci
+          - [ ] Dodaj \`CircularProgressIndicator\` za učitavanje
+          - [ ] Skeleton loading za listu recepata
+          - [ ] Loading state za AI pozive (može trajati dulje)
+          - [ ] Onemogući gumbe dok traje async operacija" || true
+
+      - name: "Polish - Add error handling"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Add error handling" \
+            --label "ui,bug,polish" \
+            --body "## Opis
+          Implementirati konzistentno rukovanje greškama kroz cijelu aplikaciju.
+
+          ## Zadaci
+          - [ ] Prikaži Snackbar za greške
+          - [ ] Retry gumb za mrežne greške
+          - [ ] Specifične poruke za Firebase greške (korisnik ne postoji, pogrešna lozinka...)
+          - [ ] Log greške u Firebase Crashlytics" || true
+
+      - name: "Polish - Improve UI styling"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Improve UI styling" \
+            --label "ui,polish" \
+            --body "## Opis
+          Poboljšati vizualni izgled aplikacije.
+
+          ## Zadaci
+          - [ ] Definiraj dosljednu paletu boja (Material 3 theme)
+          - [ ] Prilagodi tipografiju
+          - [ ] Dodaj zaobljene kutove i sjene
+          - [ ] Animacije prijelaza između ekrana
+          - [ ] Dark mode podrška" || true
+
+      - name: "Polish - Handle empty states"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Handle empty states" \
+            --label "ui,polish" \
+            --body "## Opis
+          Prikazati smislene poruke kad nema podataka za prikaz.
+
+          ## Primjeri
+          - Feed bez recepata: \"Još nema recepata. Budi prvi!\"
+          - Pretraga bez rezultata: \"Nismo pronašli recepte za upit '...'\\"
+          - Profil bez recepata: \"Još nisi objavio/la nijedan recept\"
+
+          ## Zadaci
+          - [ ] Kreiraj \`EmptyState\` composable
+          - [ ] Koristi na svim ekranima s listama" || true
+
+      - name: "Polish - Optimize Firestore queries"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Optimize Firestore queries" \
+            --label "backend,polish" \
+            --body "## Opis
+          Optimizirati Firestore querije za bolju performansu i manji trošak.
+
+          ## Zadaci
+          - [ ] Dodaj Firestore indekse za složene querije
+          - [ ] Implementiraj paginaciju (Firestore cursors)
+          - [ ] Ograniči broj dokumenata po queriju
+          - [ ] Koristi Firestore caching" || true
+
+      # ── 13. Testing ────────────────────────────────────────────────────────
+      - name: "Testing - Write unit tests for repository"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Write unit tests for repository" \
+            --label "testing" \
+            --body "## Opis
+          Napisati unit testove za repozitorij sloj.
+
+          ## Zadaci
+          - [ ] Setup MockK za mockanje Firebase ovisnosti
+          - [ ] Testiraj \`RecipeRepository\` metode
+          - [ ] Testiraj \`AuthRepository\` metode
+          - [ ] Provjeri da testovi prolaze s \`./gradlew test\`" || true
+
+      - name: "Testing - Write ViewModel tests"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Write ViewModel tests" \
+            --label "testing" \
+            --body "## Opis
+          Napisati unit testove za ViewModele.
+
+          ## Zadaci
+          - [ ] Setup \`TestCoroutineDispatcher\`
+          - [ ] Testiraj UI state emisiju
+          - [ ] Testiraj \`HomeViewModel\`
+          - [ ] Testiraj \`AuthViewModel\`" || true
+
+      - name: "Testing - Manual testing of all flows"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Manual testing of all flows" \
+            --label "testing" \
+            --body "## Opis
+          Ručno testirati sve korisničke tokove aplikacije.
+
+          ## Tokovi za testiranje
+          - [ ] Registracija i login
+          - [ ] Dodavanje, uređivanje, brisanje recepta
+          - [ ] Pretraga i filtriranje
+          - [ ] Lajkanje i ocjenjivanje
+          - [ ] Follow/Unfollow
+          - [ ] AI import recepta
+          - [ ] AI prijedlozi po sastojcima" || true
+
+      - name: "Testing - Fix bugs"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Fix bugs" \
+            --label "bug,testing" \
+            --body "## Opis
+          Popraviti greške pronađene tijekom testiranja.
+
+          ## Zadaci
+          - [ ] Skupi sve prijavljene greške
+          - [ ] Prioritiziraj prema važnosti
+          - [ ] Popravi i provjeri svaki bug
+          - [ ] Regresijsko testiranje" || true
+
+      # ── 14. Final tasks ────────────────────────────────────────────────────
+      - name: "Final - Prepare screenshots for README"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Prepare screenshots for README" \
+            --label "feature" \
+            --body "## Opis
+          Napraviti screenshotove aplikacije za README dokumentaciju.
+
+          ## Screenshotovi
+          - [ ] Home screen / feed
+          - [ ] Recipe details
+          - [ ] Add recipe
+          - [ ] User profile
+          - [ ] AI import
+          - [ ] Search / filter
+          - [ ] Login / Register
+
+          ## Zadaci
+          - [ ] Snimi screenshotove na uređaju/emulatoru
+          - [ ] Dodaj u \`README.md\`" || true
+
+      - name: "Final - Prepare demo scenario"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Prepare demo scenario" \
+            --label "feature" \
+            --body "## Opis
+          Pripremiti scenarij demonstracije aplikacije za predaju/prezentaciju.
+
+          ## Scenarij
+          1. Registracija novog korisnika
+          2. Dodavanje recepta s ručnim unosom
+          3. AI import recepta iz teksta
+          4. Pretraga recepta
+          5. Follow korisnika
+          6. Ocjenivanje recepta
+          7. AI prijedlozi po sastojcima
+
+          ## Zadaci
+          - [ ] Pripremi testne podatke (2-3 korisnika, 5+ recepata)
+          - [ ] Proći kroz scenarij bez grešaka" || true
+
+      - name: "Final - Prepare presentation"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Prepare presentation" \
+            --label "feature" \
+            --body "## Opis
+          Pripremiti prezentaciju projekta za kolegij.
+
+          ## Sadržaj prezentacije
+          - [ ] Opis problema i rješenja
+          - [ ] Arhitektura aplikacije
+          - [ ] Korištene tehnologije
+          - [ ] Demo aplikacije (live ili video)
+          - [ ] Izazovi i naučene lekcije
+          - [ ] Buduće funkcionalnosti" || true
+
+      - name: "Final - Refactor code"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Refactor code" \
+            --label "feature" \
+            --body "## Opis
+          Refaktorirati kod za bolju čitkost i održivost.
+
+          ## Zadaci
+          - [ ] Ukloni duplicirani kod
+          - [ ] Poboljšaj imenovanje varijabli i funkcija
+          - [ ] Dodaj komentare za složenu logiku
+          - [ ] Provjeri SOLID principe
+          - [ ] Detektiraj lint upozorenja i popravi ih" || true
+
+      - name: "Final - Final bug fixing"
+        run: |
+          gh issue create \
+            --repo "$REPO" \
+            --title "Final bug fixing" \
+            --label "bug" \
+            --body "## Opis
+          Posljednje ispravljanje grešaka prije predaje projekta.
+
+          ## Zadaci
+          - [ ] Testiraj na stvarnom uređaju
+          - [ ] Provjeri performansu na slabijim uređajima
+          - [ ] Popravi sve crash-eve
+          - [ ] Provjeri rubne slučajeve (prazni unosi, nema interneta...)" || true
