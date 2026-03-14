@@ -742,7 +742,7 @@ jobs:
           Implementirati filtriranje recepata po tagovima.
 
           ## Zadaci
-          - [ ] Prikazi chip-ove s dostupnim tagovima
+          - [ ] Prikaži chip-ove s dostupnim tagovima
           - [ ] Odaberi jedan ili više tagova za filtriranje
           - [ ] Firestore query: \`whereArrayContains(\"tags\", tag)\`
           - [ ] Kombiniranje s ostalim filterima" || true
@@ -1322,7 +1322,7 @@ jobs:
           - [ ] Poboljšaj imenovanje varijabli i funkcija
           - [ ] Dodaj komentare za složenu logiku
           - [ ] Provjeri SOLID principe
-          - [ ] Detektors lint upozorenja i popravi ih" || true
+          - [ ] Detektiraj lint upozorenja i popravi ih" || true
 
       - name: "Final - Final bug fixing"
         run: |
