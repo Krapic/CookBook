@@ -1,7 +1,5 @@
 package com.rma.cookbook.domain.model
 
-<<<<<<< Updated upstream
-=======
 data class Recipe(
     val id: String = "",
     val title: String = "",
@@ -18,4 +16,3 @@ data class Recipe(
     val likedBy: List<String> = emptyList(),
     val createdAt: Long = 0L
 )
->>>>>>> Stashed changes

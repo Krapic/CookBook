@@ -1,7 +1,5 @@
 package com.rma.cookbook.ui.navigation
 
-<<<<<<< Updated upstream
-=======
 sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Register : Screen("register")
@@ -11,4 +9,3 @@ sealed class Screen(val route: String) {
     data object Profile : Screen("profile")
     data object AiImport : Screen("ai_import")
 }
->>>>>>> Stashed changes

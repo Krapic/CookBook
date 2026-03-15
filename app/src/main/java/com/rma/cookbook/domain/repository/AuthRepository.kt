@@ -1,7 +1,5 @@
 package com.rma.cookbook.domain.repository
 
-<<<<<<< Updated upstream
-=======
 import com.rma.cookbook.domain.model.User
 import com.rma.cookbook.util.Resource
 
@@ -11,4 +9,3 @@ interface AuthRepository {
     fun logout()
     fun getCurrentUser(): User?
 }
->>>>>>> Stashed changes

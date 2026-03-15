@@ -1,7 +1,5 @@
 package com.rma.cookbook.domain.model
 
-<<<<<<< Updated upstream
-=======
 data class User(
     val uid: String = "",
     val displayName: String = "",
@@ -12,4 +10,3 @@ data class User(
     val following: List<String> = emptyList(),
     val createdAt: Long = 0L
 )
->>>>>>> Stashed changes
