@@ -2,7 +2,7 @@
 
 > Discover. Cook. Share.
 
-CookBook AI je mobilna aplikacija razvijena za Android koja spaja **kulinarsku zajednicu** i **umjetnu inteligenciju** kako bi korisnicima pomogla lakše otkrivati nove recepte i dijeliti vlastite.
+CookBook je mobilna aplikacija razvijena za Android koja spaja **kulinarsku zajednicu** i **umjetnu inteligenciju** kako bi korisnicima pomogla lakše otkrivati nove recepte i dijeliti vlastite.
 
 Aplikacija omogućuje korisnicima da:
 
@@ -82,7 +82,7 @@ Data Sources
 # 🗂 Struktura projekta
 
 ```
-com.cookbookai
+com.cookbook
 │
 ├── data
 │   ├── local        # Room database
