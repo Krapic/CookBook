@@ -62,7 +62,15 @@ Data Sources
    ├── Gemini AI (AI features)
    └── Room Database (lokalni cache)
 ```
+## Architecture Guidelines
 
+- `Screen` prikazuje UI i ne sadrži poslovnu logiku.
+- `ViewModel` drži stanje ekrana.
+- Svi ViewModeli nasljeđuju `BaseViewModel`.
+- Za učitavanje podataka koristi se `UiState`.
+- `UseCase` sadrži poslovnu logiku.
+- `Repository` dohvaća podatke.
+- Dependency injection se radi pomoću Hilt-a.
 ---
 
 # 🛠 Tehnologije
