@@ -2,7 +2,7 @@ package com.rma.cookbook.ui.screens.auth
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rma.cookbook.ui.viewmodel.AuthViewModel
 
 @Composable
